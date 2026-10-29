@@ -9,10 +9,8 @@ jobs:
   process-files:
     runs-on: ubuntu-latest
 
-    # ↓↓↓ ここに書き込み権限を追加します ↓↓↓
     permissions:
       contents: write
-    # ↑↑↑↑
     
     steps:
       # 1. リポジトリのコードをチェックアウト
@@ -30,18 +28,14 @@ jobs:
         run: |
           python -c "from core.media_processor import MediaProcessor; processor = MediaProcessor(); print(processor.process_recovered_files())"
 
-      # 4. 仕分け結果（移動されたファイル）を自動でGitにコミット＆プッシュ
-      - name: Commit and push processed files
+      # 4. 仕分け結果を強制プッシュでクラウド上へ反映（同期処理なし）
+      - name: Force commit and push processed files
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 1. まずGitHub上の最新状態を確実に引っ張ってくる（競合を防ぐ）
-          git pull origin main --rebase
-          
-          # 2. 仕分けされたファイルをステージングしてコミット
           git add trushes/
           git diff --staged --quiet || git commit -m "Auto-sort media files in trushes/"
           
-          # 3. プッシュする
-          git push origin main
+          # 同期のエラーを一切無視してクラウド上の状態を上書き強制プッシュ
+          git push origin main --force
