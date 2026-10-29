@@ -33,12 +33,15 @@ jobs:
       # 4. 仕分け結果（移動されたファイル）を自動でGitにコミット＆プッシュ
       - name: Commit and push processed files
         run: |
-          # 4. 仕分け結果（移動されたファイル）を自動でGitにコミット＆プッシュ
-      - name: Commit and push processed files
-        run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 1. まずGitHub上の最新状態を確実に引っ張ってくる（競合を防ぐ）
           git pull origin main --rebase
+          
+          # 2. 仕分けされたファイルをステージングしてコミット
           git add trushes/
           git diff --staged --quiet || git commit -m "Auto-sort media files in trushes/"
-          git push
+          
+          # 3. プッシュする
+          git push origin main
