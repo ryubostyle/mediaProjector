@@ -1,1 +1,20 @@
+[tool.poetry]
+name = "media-projector"
+version = "0.1.0"
+description = "Media processing core with Poetry and API extension"
+authors = ["ryubostyle <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "core"}]
 
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.110.0"
+uvicorn = "^0.28.0"
+pillow = "^10.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
