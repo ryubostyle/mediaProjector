@@ -1,0 +1,41 @@
+name: Auto Process Media Trushes
+
+on:
+  push:
+    paths:
+      - 'trushes/**'  # trushes/ フォルダ内へのファイルの追加・変更を検知
+
+jobs:
+  process-files:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+    
+    steps:
+      # 1. リポジトリのコードをチェックアウト
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Python環境のセットアップ
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. メディア処理スクリプトの実行（Pythonスクリプトを呼び出し）
+      - name: Run Media Processor
+        run: |
+          python -c "from core.media_processor import MediaProcessor; processor = MediaProcessor(); print(processor.process_recovered_files())"
+
+      # 4. 仕分け結果を強制プッシュでクラウド上へ反映（同期処理なし）
+      - name: Force commit and push processed files
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add trushes/
+          git diff --staged --quiet || git commit -m "Auto-sort media files in trushes/"
+          
+          # 同期のエラーを一切無視してクラウド上の状態を上書き強制プッシュ
+          git push origin main --force
