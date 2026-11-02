@@ -47,19 +47,16 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 変更があればステージングしてコミット
           git add trushes/
-          git status
           
-          # 変更がある場合のみコミット＆プッシュを実行
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
             git commit -m "Auto-sort media files and parse film.yaml [skip ci]"
             
-            # 【ここがポイント】プッシュ前にリモートの変更を安全に同期する
+            # 【ここを追加】プッシュする前にリモートの変更を安全に統合する
             git pull origin main --rebase --autostash
             
-            # 同期が成功したらプッシュ
+            # 統合が成功したらプッシュ
             git push origin main
           fi
