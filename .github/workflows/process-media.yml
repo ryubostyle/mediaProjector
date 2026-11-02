@@ -47,6 +47,9 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
+          # ブランチの追跡設定を明示的に強制する
+          git branch --set-upstream-to=origin/main main || true
+          
           git add trushes/
           
           if git diff --staged --quiet; then
@@ -54,9 +57,34 @@ jobs:
           else
             git commit -m "Auto-sort media files and parse film.yaml [skip ci]"
             
-            # 【ここを追加】プッシュする前にリモートの変更を安全に統合する
-            git pull origin main --rebase --autostash
+            # 【エラートラップ＆自動調停ループ】
+            # プッシュが拒否された場合、強制的にリモートを取り込んでから最大3回リトライする
+            max_retries=3
+            count=0
+            success=false
             
-            # 統合が成功したらプッシュ
-            git push origin main
+            while [ $count -lt $max_retries ]; do
+              echo "Push attempt $((count+1)) of $max_retries..."
+              
+              # 1. リモートの最新をフェッチ
+              git fetch origin main
+              
+              # 2. リベースでリモートの変更を統合（コンフリクト時はローカル優先または安全にマージ）
+              git pull origin main --rebase --autostash || true
+              
+              # 3. プッシュを実行
+              if git push origin HEAD:main; then
+                success=true
+                break
+              else
+                echo "Push rejected. Retrying in 3 seconds..."
+                sleep 3
+                count=$((count+1))
+              fi
+            done
+            
+            if [ "$success" = false ]; then
+              echo "Error: Failed to push after $max_retries attempts."
+              exit 1
+            fi
           fi
