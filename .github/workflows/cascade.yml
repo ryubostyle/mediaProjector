@@ -1,0 +1,31 @@
+name: Ryubo Cascade Engine
+
+# 1. どんな風が吹いたときに発動するか（トリガー）
+on:
+  push:  # リポジトリに新しいファイル（一雫）が置かれた瞬間
+    paths-ignore:
+      - 'Assets/**'  # フィルター後の移動で無限ループしないための配慮
+      - 'trushes/**'
+
+jobs:
+  breeze_dispatch:
+    runs-on: ubuntu-latest
+    
+    # GitHub上のリポジトリ書き込み権限（自らGitに刻むために必要）
+    permissions:
+      contents: write
+
+    steps:
+      # 宇宙の座標系（リポジトリ）をクラウド上に展開する
+      - name: Checkout Universe
+        uses: actions/checkout@v4
+
+      # Pythonの息吹を整える
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 眠っていた CascadingFilter の系譜（main.py）をクラウド上でキックする
+      - name: Invoke main.py
+        run: python main.py
