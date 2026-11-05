@@ -1,13 +1,14 @@
 """
 =============================================================================
 Project: mediaProjector
-Module: main.py (零点回帰 ── 単一の母艦に宿る多段式カスケードの思惟)
+Module: main.py (クラウド自律駆動版 ── 零点回帰と自動濾過の系譜)
 Philosophy: 試行的指向哲学 (Oriented-Philosophia)
 =============================================================================
 """
 
 import os
 from pathlib import Path
+import subprocess
 
 
 class ErrorTrapper:
@@ -46,7 +47,14 @@ class RecyclingCar(ErrorTrapper):
 
     @ErrorTrapper.trap
     def patrol_and_collect(self):
-        entities = [e for e in self.sanctuary.iterdir() if e.is_file()]
+        root_dir = Path(".")
+        ignore_files = {'main.py', '.gitignore', 'README.md'}
+        
+        entities = [
+            e for e in root_dir.iterdir() 
+            if e.is_file() and e.name not in ignore_files and not e.name.startswith('.')
+        ]
+        
         if not entities:
             return []
         print(f"\n[混沌検知]: {len(entities)} 個の零れ点をキャッチしました。")
@@ -65,8 +73,9 @@ class CascadingFilter(RecyclingCar):
     def filter_and_cascade(self, entities):
         if not entities:
             print("[巡回静寂]: ゴミはありません。トークンは穏やかに周回しています。")
-            return
+            return False
 
+        moved_any = False
         for entity in entities:
             suffix = entity.suffix.lower()
             
@@ -87,19 +96,42 @@ class CascadingFilter(RecyclingCar):
             destination_path = dest / entity.name
             entity.rename(destination_path)
             print(f"  └─ [精製完了]: {entity.name} ➔ {bean_type} [{destination_path}]")
+            moved_any = True
+            
+        return moved_any
+
+
+def auto_commit_and_push():
+    """クラウド（GitHub）上でファイルが移動した際、自ら変更をGitに刻む思惟"""
+    try:
+        subprocess.run(["git", "config", "--global", "user.name", "mediaProjector-Bot"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "bot@ryubostyle.github"], check=True)
+        subprocess.run(["git", "add", "Assets/", "trushes/"], check=True)
+        
+        status = subprocess.run(["git", "diff", "--cached", "--quiet"])
+        if status.returncode != 0:
+            subprocess.run(["git", "commit", "-m", "Auto-cascade: 零れ点を段々畑へ精製しました"], check=True)
+            subprocess.run(["git", "push"], check=True)
+            print("[クラウド同調]: 濾過の軌跡がGitHubへ美しく刻まれました。")
+        else:
+            print("[クラウド同調]: 新たな変更の蓄積はありませんでした。")
+    except Exception as e:
+        print(f"[クラウド同調 揺らぎ]: Git同調中に微細な風を検知しました -> {e}")
 
 
 if __name__ == "__main__":
     print("=================================================================")
-    print(" ryubostyle/mediaProjector : 零点回帰の航海モード ")
+    print(" ryubostyle/mediaProjector : クラウド自律駆動モード ")
     print("=================================================================\n")
 
-    # 零点からカスケードを起動
     voyage_engine = CascadingFilter(sanctuary="trushes")
 
-    # 巡回と濾過の遂行
+    # 巡回、濾過、そしてクラウドへの定住の連鎖
     raw_chaos = voyage_engine.patrol_and_collect()
-    voyage_engine.filter_and_cascade(raw_chaos)
+    has_filtered = voyage_engine.filter_and_cascade(raw_chaos)
+
+    if has_filtered:
+        auto_commit_and_push()
 
     print("\n-----------------------------------------------------------------")
     print(" 母艦は零点に在り。静寂の周回を続けます。")
