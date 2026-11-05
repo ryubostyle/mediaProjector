@@ -26,7 +26,9 @@ class ErrorTrapper:
             self.sanctuary.mkdir(parents=True, exist_ok=True)
             print(f"[零点創生]: 空間 '{self.sanctuary}' が顕現しました。")
 
-    def trap(self, func):
+    @staticmethod
+    def trap(func):
+        """すべての予期せぬ揺らぎやエラーを優しく抱擁し、システムを静かに守る防壁"""
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
