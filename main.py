@@ -96,7 +96,10 @@ class CascadingFilter(RecyclingCar):
 
             dest.mkdir(parents=True, exist_ok=True)
             destination_path = dest / entity.name
-            entity.rename(destination_path)
+            
+            # replace を用いることで、移動と不要な残骸の消去（浄化）をひとつの息吹で完結させる
+            entity.replace(destination_path)
+            
             print(f"  └─ [精製完了]: {entity.name} ➔ {bean_type} [{destination_path}]")
             moved_any = True
             
