@@ -50,12 +50,23 @@ class RecyclingCar(ErrorTrapper):
     @ErrorTrapper.trap
     def patrol_and_collect(self):
         root_dir = Path(".")
-        ignore_files = {'main.py', '.gitignore', 'README.md'}
         
-        entities = [
-            e for e in root_dir.iterdir() 
-            if e.is_file() and e.name not in ignore_files and not e.name.startswith('.')
-        ]
+        # 母艦のインフラ・脳髄として保護する拡張子およびシステムファイル
+        ignore_extensions = {'.py', '.yml', '.yaml', '.md'}
+        ignore_specific_files = {'.gitignore', '.nojekyll'}
+        
+        entities = []
+        for e in root_dir.iterdir():
+            if not e.is_file():
+                continue
+            # 隠しファイルや特定の管理ファイルは対象外
+            if e.name in ignore_specific_files or e.name.startswith('.'):
+                continue
+            # スクリプトや設定ファイル等のシステムパーツは濾過しない（自動防壁）
+            if e.suffix.lower() in ignore_extensions:
+                continue
+                
+            entities.append(e)
         
         if not entities:
             return []
